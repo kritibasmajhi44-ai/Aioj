@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ElevenLabs Voice AI</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --bg: #080810;
+  --surface: #0f0f1a;
+  --card: #141422;
+  --card2: #1a1a2e;
+  --border: #252540;
+  --accent: #6c47ff;
+  --accent-h: #8b6fff;
+  --green: #22d3a5;
+  --red: #ff5a5a;
+  --yellow: #fbbf24;
+  --text: #eeeef5;
+  --muted: #5a5a7a;
+  --glow: rgba(108, 71, 255, 0.25);
+  --glow2: rgba(34, 211, 165, 0.15);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 40% at 15% 10%, rgba(108,71,255,0.1) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 85% 90%, rgba(34,211,165,0.07) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.container {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 20px 16px 80px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── HEADER ── */
+.header {
+  text-align: center;
+  padding: 36px 0 28px;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.brand-icon {
+  width: 42px; height: 42px;
+  background: linear-gradient(135deg, var(--accent), var(--green));
+  border-radius: 11px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  box-shadow: 0 0 28px var(--glow);
+}
+
+.brand-name {
+  font-size: 20px;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--accent-h), var(--green));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+h1 {
+  font-size: clamp(24px, 5.5vw, 38px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 8px;
+  background: linear-gradient(135deg, #fff 50%, var(--accent-h));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.sub {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.badges {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.badge {
+  padding: 4px 11px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  display: flex; align-items: center; gap: 5px;
+}
+
+.badge.live { color: var(--green); border-color: rgba(34,211,165,0.3); }
+.badge.api  { color: var(--accent-h); border-color: rgba(108,71,255,0.3); }
+
+/* ── CARD ── */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 20px;
+  margin-bottom: 14px;
+  position: relative;
+  overflow: hidden;
+}
+
+.card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 20%; right: 20%; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity: 0.4;
+}
+
+.card-title {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 14px;
+  display: flex; align-items: center; gap: 6px;
+}
+
+/* ── API KEY ── */
+.api-row {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.api-input-wrap {
+  flex: 1;
+  position: relative;
+}
+
+.api-input-wrap input {
+  width: 100%;
+  padding: 11px 42px 11px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s;
+  letter-spacing: 0.02em;
+}
+
+.api-input-wrap input:focus { border-color: var(--accent); }
+.api-input-wrap input.valid { border-color: var(--green); }
+.api-input-wrap input.error { border-color: var(--red); }
+
+.eye-btn {
+  position: absolute;
+  right: 10px; top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px;
+  transition: color 0.2s;
+}
+.eye-btn:hover { color: var(--text); }
+
+.btn-load {
+  padding: 11px 18px;
+  background: linear-gradient(135deg, var(--accent), #4a2de0);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+  box-shadow: 0 4px 16px var(--glow);
+}
+
+.btn-load:hover { transform: translateY(-1px); box-shadow: 0 6px 20px var(--glow); }
+.btn-load:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.api-status {
+  margin-top: 8px;
+  font-size: 12px;
+  min-height: 18px;
+  display: flex; align-items: center; gap: 6px;
+}
+
+.api-status.ok { color: var(--green); }
+.api-status.err { color: var(--red); }
+.api-status.loading { color: var(--muted); }
+
+/* ── SELECTS ── */
+.row2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.field label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 6px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+select, .field input[type="text"] {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath d='M5 7L0.5 2.5h9z' fill='%235a5a7a'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+}
+
+select:focus, .field input[type="text"]:focus { border-color: var(--accent); }
+select option { background: #141422; }
+select:disabled { opacity: 0.5; }
+
+#voiceInfo {
+  margin-top: 10px;
+  padding: 10px 14px;
+  background: var(--surface);
+  border-radius: 10px;
+  font-size: 12px;
+  color: var(--muted);
+  min-height: 38px;
+  border: 1px solid var(--border);
+  display: none;
+}
+
+/* ── TEXT AREA ── */
+.text-wrap {
+  position: relative;
+}
+
+textarea {
+  width: 100%;
+  min-height: 130px;
+  padding: 13px 15px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  line-height: 1.65;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+textarea:focus { border-color: var(--accent); }
+textarea::placeholder { color: var(--muted); }
+
+.text-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 7px;
+}
+
+.char-info {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.char-info span { color: var(--accent-h); }
+
+/* ── LANG SHORTCUTS ── */
+.lang-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.chip {
+  padding: 5px 11px;
+  border-radius: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.18s;
+  color: var(--muted);
+}
+
+.chip:hover {
+  border-color: var(--accent);
+  color: var(--text);
+  background: rgba(108,71,255,0.1);
+}
+
+/* ── SLIDERS ── */
+.sliders-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 14px;
+}
+
+.slider-field label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 8px;
+}
+
+.slider-field label span {
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--accent-h);
+  font-size: 11px;
+  letter-spacing: 0;
+}
+
+input[type="range"] {
+  width: 100%;
+  -webkit-appearance: none;
+  height: 3px;
+  background: var(--border);
+  border-radius: 99px;
+  outline: none;
+  cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 15px; height: 15px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  box-shadow: 0 0 8px var(--glow);
+}
+
+/* ── WAVEFORM ── */
+.waveform-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  height: 52px;
+  margin: 4px 0;
+}
+
+.wb {
+  width: 3px;
+  border-radius: 99px;
+  background: linear-gradient(180deg, var(--accent), var(--green));
+  height: 5px;
+  opacity: 0.25;
+  transition: height 0.08s;
+}
+
+.wb.active {
+  opacity: 1;
+  animation: wa 0.7s ease-in-out infinite;
+}
+
+@keyframes wa {
+  0%, 100% { height: 6px; }
+  50% { height: 38px; }
+}
+
+.wb.active:nth-child(2n)   { animation-delay: 0.07s; }
+.wb.active:nth-child(3n)   { animation-delay: 0.14s; }
+.wb.active:nth-child(4n)   { animation-delay: 0.04s; }
+.wb.active:nth-child(5n)   { animation-delay: 0.2s; }
+.wb.active:nth-child(7n)   { animation-delay: 0.1s; }
+
+/* ── AUDIO PLAYER ── */
+#audioWrap {
+  display: none;
+  margin-top: 10px;
+}
+
+audio {
+  width: 100%;
+  border-radius: 10px;
+  outline: none;
+  accent-color: var(--accent);
+  background: var(--surface);
+}
+
+/* ── BUTTONS ── */
+.btn-row {
+  display: flex;
+  gap: 10px;
+}
+
+.btn {
+  flex: 1;
+  padding: 14px 20px;
+  border: none;
+  border-radius: 12px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: all 0.2s;
+  position: relative; overflow: hidden;
+}
+
+.btn::after { content: ''; position: absolute; inset: 0; background: white; opacity: 0; transition: opacity 0.15s; }
+.btn:active::after { opacity: 0.07; }
+
+.btn-gen {
+  background: linear-gradient(135deg, var(--accent), #3d1fad);
+  color: white;
+  box-shadow: 0 4px 20px var(--glow);
+}
+
+.btn-gen:hover { transform: translateY(-1px); box-shadow: 0 8px 28px var(--glow); }
+.btn-gen:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
+
+.btn-dl {
+  background: var(--surface);
+  color: var(--green);
+  border: 1px solid rgba(34,211,165,0.3);
+  flex: 0;
+  padding: 14px 18px;
+  font-size: 13px;
+  display: none;
+}
+.btn-dl:hover { background: rgba(34,211,165,0.08); }
+
+.btn-copy {
+  background: var(--surface);
+  color: var(--muted);
+  border: 1px solid var(--border);
+  flex: 0;
+  padding: 14px 16px;
+  font-size: 13px;
+}
+.btn-copy:hover { color: var(--text); border-color: var(--accent); }
+
+/* ── PROGRESS ── */
+.progress-wrap {
+  display: none;
+  margin-top: 10px;
+}
+
+.progress-bar {
+  height: 3px;
+  background: var(--border);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--green));
+  border-radius: 99px;
+  width: 0%;
+  transition: width 0.3s;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { opacity: 0.7; }
+  50% { opacity: 1; }
+  100% { opacity: 0.7; }
+}
+
+.progress-text {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 6px;
+  text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ── CREDITS ── */
+.credits-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  margin-bottom: 14px;
+  font-size: 12px;
+}
+
+.credit-item { display: flex; align-items: center; gap: 6px; color: var(--muted); }
+.credit-item strong { color: var(--text); font-family: 'JetBrains Mono', monospace; }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed;
+  bottom: 24px; left: 50%;
+  transform: translateX(-50%) translateY(70px);
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 11px 18px;
+  font-size: 13px; font-weight: 500;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+  transition: transform 0.3s cubic-bezier(.34,1.56,.64,1);
+  z-index: 99;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+.toast.ok  { color: var(--green); border-color: rgba(34,211,165,0.3); }
+.toast.err { color: var(--red);   border-color: rgba(255,90,90,0.3); }
+
+/* ── HISTORY ── */
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.history-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.history-item:hover { border-color: var(--accent); }
+.history-text { flex: 1; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.history-play { color: var(--accent-h); font-size: 16px; }
+
+/* ── FOOTER ── */
+.footer {
+  text-align: center;
+  color: var(--muted);
+  font-size: 11px;
+  margin-top: 28px;
+  line-height: 1.9;
+}
+
+.footer a { color: var(--accent-h); text-decoration: none; }
+
+@media (max-width: 520px) {
+  .row2 { grid-template-columns: 1fr; }
+  .sliders-grid { grid-template-columns: 1fr; }
+  .btn-row { flex-wrap: wrap; }
+  .btn-dl, .btn-copy { flex: 1; }
+  .credits-bar { flex-direction: column; gap: 8px; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="brand">
+      <div class="brand-icon">🎙️</div>
+      <div class="brand-name">VoiceAI × ElevenLabs</div>
+    </div>
+    <h1>Realistic Voice Generator</h1>
+    <p class="sub">ElevenLabs API · 29 Languages · Human-quality TTS</p>
+    <div class="badges">
+      <div class="badge live">● Live API</div>
+      <div class="badge api">ElevenLabs</div>
+      <div class="badge">📱 Mobile Ready</div>
+      <div class="badge">⬇️ Download MP3</div>
+    </div>
+  </div>
+
+  <!-- API KEY -->
+  <div class="card">
+    <div class="card-title">🔑 ElevenLabs API Key</div>
+    <div class="api-row">
+      <div class="api-input-wrap">
+        <input type="password" id="apiKey" placeholder="sk_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" autocomplete="off" spellcheck="false">
+        <button class="eye-btn" onclick="toggleKey()" id="eyeBtn">👁</button>
+      </div>
+      <button class="btn-load" id="loadBtn" onclick="loadVoices()">Load Voices</button>
+    </div>
+    <div class="api-status" id="apiStatus">Enter your ElevenLabs API key to get started</div>
+    <div style="font-size:11px; color:var(--muted); margin-top:8px;">
+      🔗 Get free key: <a href="https://elevenlabs.io" target="_blank" style="color:var(--accent-h)">elevenlabs.io</a>
+      &nbsp;|&nbsp; Free tier: 10,000 chars/month
+      &nbsp;|&nbsp; Key stored only in browser memory
+    </div>
+  </div>
+
+  <!-- CREDITS BAR (shown after login) -->
+  <div class="credits-bar" id="creditsBar" style="display:none">
+    <div class="credit-item">👤 Subscription: <strong id="subTier">—</strong></div>
+    <div class="credit-item">📊 Used: <strong id="usedChars">—</strong></div>
+    <div class="credit-item">✅ Remaining: <strong id="remChars">—</strong></div>
+  </div>
+
+  <!-- VOICE SELECTION -->
+  <div class="card">
+    <div class="card-title">🎭 Voice & Language</div>
+    <div class="row2">
+      <div class="field">
+        <label>Voice</label>
+        <select id="voiceSelect" disabled onchange="showVoiceInfo()">
+          <option value="">— Load voices first —</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Language / Accent</label>
+        <select id="langSelect">
+          <option value="en">🇺🇸 English (US)</option>
+          <option value="en-GB">🇬🇧 English (UK)</option>
+          <option value="en-AU">🇦🇺 English (AU)</option>
+          <option value="hi">🇮🇳 Hindi (हिंदी)</option>
+          <option value="ur">🇵🇰 Urdu (اردو)</option>
+          <option value="ar">🇸🇦 Arabic (العربية)</option>
+          <option value="zh">🇨🇳 Chinese (普通话)</option>
+          <option value="es">🇪🇸 Spanish</option>
+          <option value="es-MX">🇲🇽 Spanish (Mexico)</option>
+          <option value="fr">🇫🇷 French</option>
+          <option value="de">🇩🇪 German</option>
+          <option value="pt">🇧🇷 Portuguese</option>
+          <option value="pt-PT">🇵🇹 Portuguese (EU)</option>
+          <option value="it">🇮🇹 Italian</option>
+          <option value="nl">🇳🇱 Dutch</option>
+          <option value="pl">🇵🇱 Polish</option>
+          <option value="ru">🇷🇺 Russian</option>
+          <option value="ja">🇯🇵 Japanese</option>
+          <option value="ko">🇰🇷 Korean</option>
+          <option value="tr">🇹🇷 Turkish</option>
+          <option value="id">🇮🇩 Indonesian</option>
+          <option value="ms">🇲🇾 Malay</option>
+          <option value="vi">🇻🇳 Vietnamese</option>
+          <option value="th">🇹🇭 Thai</option>
+          <option value="sv">🇸🇪 Swedish</option>
+          <option value="da">🇩🇰 Danish</option>
+          <option value="fi">🇫🇮 Finnish</option>
+          <option value="cs">🇨🇿 Czech</option>
+          <option value="ro">🇷🇴 Romanian</option>
+          <option value="uk">🇺🇦 Ukrainian</option>
+          <option value="bn">🇧🇩 Bengali</option>
+          <option value="ta">🇮🇳 Tamil</option>
+          <option value="te">🇮🇳 Telugu</option>
+          <option value="mr">🇮🇳 Marathi</option>
+          <option value="gu">🇮🇳 Gujarati</option>
+          <option value="pa">🇮🇳 Punjabi</option>
+          <option value="kn">🇮🇳 Kannada</option>
+          <option value="ml">🇮🇳 Malayalam</option>
+          <option value="he">🇮🇱 Hebrew</option>
+          <option value="fa">🇮🇷 Persian</option>
+          <option value="el">🇬🇷 Greek</option>
+          <option value="hu">🇭🇺 Hungarian</option>
+          <option value="sk">🇸🇰 Slovak</option>
+          <option value="bg">🇧🇬 Bulgarian</option>
+          <option value="hr">🇭🇷 Croatian</option>
+          <option value="sr">🇷🇸 Serbian</option>
+          <option value="lt">🇱🇹 Lithuanian</option>
+          <option value="lv">🇱🇻 Latvian</option>
+          <option value="et">🇪🇪 Estonian</option>
+          <option value="sl">🇸🇮 Slovenian</option>
+          <option value="af">🇿🇦 Afrikaans</option>
+          <option value="sw">🇰🇪 Swahili</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="voiceInfo"></div>
+
+    <div class="field" style="margin-top:12px">
+      <label>Model</label>
+      <select id="modelSelect">
+        <option value="eleven_multilingual_v2">Multilingual v2 — Best Quality (29 langs)</option>
+        <option value="eleven_flash_v2_5">Flash v2.5 — Fastest (Ultra-low latency)</option>
+        <option value="eleven_turbo_v2_5">Turbo v2.5 — Balanced Speed+Quality</option>
+        <option value="eleven_monolingual_v1">Monolingual v1 — English only</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- TEXT INPUT -->
+  <div class="card">
+    <div class="card-title">✍️ Text to Speak</div>
+    <div class="text-wrap">
+      <textarea id="textInput" placeholder="Type anything in any language...&#10;&#10;हिंदी, اردو, العربية, 中文, español — sab kuch likho!&#10;&#10;ElevenLabs automatically detects the language." oninput="updateCount()"></textarea>
+    </div>
+    <div class="text-footer">
+      <div class="char-info"><span id="charCount">0</span> / 5000 chars</div>
+      <div style="font-size:11px; color:var(--muted)">~<span id="estCost">0</span> chars used</div>
+    </div>
+    <div class="card-title" style="margin-top:14px">⚡ Quick Sample Texts</div>
+    <div class="lang-chips">
+      <div class="chip" onclick="setTxt('Hello! Welcome to ElevenLabs Voice AI. This is how I sound.')">English</div>
+      <div class="chip" onclick="setTxt('नमस्ते! मैं एक AI आवाज़ हूँ। मैं आपकी मदद करने के लिए यहाँ हूँ।')">हिंदी</div>
+      <div class="chip" onclick="setTxt('السلام عليكم! أنا صوت الذكاء الاصطناعي، كيف يمكنني مساعدتك؟')">عربي</div>
+      <div class="chip" onclick="setTxt('Hola! Soy una voz de inteligencia artificial. ¿Cómo puedo ayudarte hoy?')">Español</div>
+      <div class="chip" onclick="setTxt('Bonjour! Je suis une voix artificielle. Comment puis-je vous aider?')">Français</div>
+      <div class="chip" onclick="setTxt('你好！我是一个人工智能语音助手，很高兴为您服务。')">中文</div>
+      <div class="chip" onclick="setTxt('こんにちは！私はAI音声アシスタントです。何かお手伝いできますか？')">日本語</div>
+      <div class="chip" onclick="setTxt('آپ کو خوش آمدید! میں ایک مصنوعی ذہانت کی آواز ہوں۔')">اردو</div>
+      <div class="chip" onclick="setTxt('Guten Tag! Ich bin eine KI-Stimme. Wie kann ich Ihnen heute helfen?')">Deutsch</div>
+      <div class="chip" onclick="setTxt('안녕하세요! 저는 인공지능 음성입니다. 어떻게 도와드릴까요?')">한국어</div>
+    </div>
+  </div>
+
+  <!-- VOICE SETTINGS -->
+  <div class="card">
+    <div class="card-title">🎛️ Voice Settings</div>
+    <div class="sliders-grid">
+      <div class="slider-field">
+        <label>Stability <span id="stabVal">0.5</span></label>
+        <input type="range" id="stability" min="0" max="1" step="0.05" value="0.5" oninput="document.getElementById('stabVal').textContent=parseFloat(this.value).toFixed(2)">
+      </div>
+      <div class="slider-field">
+        <label>Clarity <span id="clarVal">0.75</span></label>
+        <input type="range" id="clarity" min="0" max="1" step="0.05" value="0.75" oninput="document.getElementById('clarVal').textContent=parseFloat(this.value).toFixed(2)">
+      </div>
+      <div class="slider-field">
+        <label>Style <span id="styleVal">0.0</span></label>
+        <input type="range" id="styleEx" min="0" max="1" step="0.05" value="0" oninput="document.getElementById('styleVal').textContent=parseFloat(this.value).toFixed(2)">
+      </div>
+    </div>
+    <div style="margin-top:12px; font-size:11px; color:var(--muted); line-height:1.7;">
+      💡 <strong style="color:var(--text)">Stability</strong> — High = consistent, Low = expressive &nbsp;|&nbsp;
+      <strong style="color:var(--text)">Clarity</strong> — High = cleaner, Low = natural &nbsp;|&nbsp;
+      <strong style="color:var(--text)">Style</strong> — Exaggeration (0 = off, use sparingly)
+    </div>
+  </div>
+
+  <!-- WAVEFORM + PLAYER -->
+  <div class="waveform-section" id="waveform"></div>
+
+  <div id="progressWrap" class="progress-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="progFill"></div></div>
+    <div class="progress-text" id="progText">Generating audio...</div>
+  </div>
+
+  <div id="audioWrap">
+    <audio id="audioPlayer" controls></audio>
+  </div>
+
+  <!-- BUTTONS -->
+  <div class="btn-row" style="margin-top:14px">
+    <button class="btn btn-gen" id="genBtn" onclick="generateVoice()" disabled>
+      <span id="genIcon">▶</span> <span id="genTxt">Generate Voice</span>
+    </button>
+    <a class="btn btn-dl" id="dlBtn" download="voice-ai.mp3">⬇ MP3</a>
+    <button class="btn btn-copy" onclick="copyText()">📋</button>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="card" id="historyCard" style="display:none; margin-top:14px">
+    <div class="card-title">🕓 Recent Generations</div>
+    <div class="history-list" id="historyList"></div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <p>Powered by <a href="https://elevenlabs.io" target="_blank">ElevenLabs API</a> — Best-in-class AI Voice</p>
+    <p>Your API key is never stored on any server — stays in your browser only</p>
+    <p style="margin-top:6px; font-size:10px;">⚠️ Do not commit your API key to GitHub. Use environment variables in production.</p>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── STATE ──
+let voices = [];
+let currentAudioUrl = null;
+let history = [];
+
+// ── WAVEFORM BUILD ──
+(function buildWave() {
+  const wv = document.getElementById('waveform');
+  for (let i = 0; i < 36; i++) {
+    const b = document.createElement('div');
+    b.className = 'wb';
+    wv.appendChild(b);
+  }
+})();
+
+// ── TOGGLE KEY VISIBILITY ──
+function toggleKey() {
+  const inp = document.getElementById('apiKey');
+  const btn = document.getElementById('eyeBtn');
+  if (inp.type === 'password') { inp.type = 'text'; btn.textContent = '🙈'; }
+  else { inp.type = 'password'; btn.textContent = '👁'; }
+}
+
+// ── GET KEY ──
+function getKey() {
+  return document.getElementById('apiKey').value.trim();
+}
+
+// ── LOAD VOICES FROM ELEVENLABS ──
+async function loadVoices() {
+  const key = getKey();
+  if (!key) { setStatus('err', '⚠️ Please enter your API key'); return; }
+
+  const btn = document.getElementById('loadBtn');
+  btn.disabled = true;
+  btn.textContent = 'Loading...';
+  setStatus('loading', '⏳ Connecting to ElevenLabs...');
+
+  try {
+    // Load voices
+    const res = await fetch('https://api.elevenlabs.io/v1/voices', {
+      headers: { 'xi-api-key': key }
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err?.detail?.message || `HTTP ${res.status} — Invalid API key?`);
+    }
+
+    const data = await res.json();
+    voices = data.voices || [];
+
+    // Populate voice select
+    const sel = document.getElementById('voiceSelect');
+    sel.innerHTML = '';
+    voices.forEach(v => {
+      const o = document.createElement('option');
+      o.value = v.voice_id;
+      o.textContent = `${v.name}${v.labels?.accent ? ' · ' + v.labels.accent : ''}${v.labels?.gender ? ' · ' + v.labels.gender : ''}`;
+      sel.appendChild(o);
+    });
+    sel.disabled = false;
+
+    // Load subscription info
+    loadSubInfo(key);
+
+    setStatus('ok', `✅ Loaded ${voices.length} voices! Select a voice and enter text.`);
+    document.getElementById('genBtn').disabled = false;
+    document.getElementById('apiKey').classList.add('valid');
+    showVoiceInfo();
+
+  } catch(e) {
+    setStatus('err', '❌ ' + e.message);
+    document.getElementById('apiKey').classList.add('error');
+    document.getElementById('apiKey').classList.remove('valid');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Load Voices';
+  }
+}
+
+// ── LOAD SUBSCRIPTION INFO ──
+async function loadSubInfo(key) {
+  try {
+    const res = await fetch('https://api.elevenlabs.io/v1/user/subscription', {
+      headers: { 'xi-api-key': key }
+    });
+    if (!res.ok) return;
+    const d = await res.json();
+    document.getElementById('subTier').textContent = d.tier || 'free';
+    document.getElementById('usedChars').textContent = (d.character_count || 0).toLocaleString();
+    document.getElementById('remChars').textContent = ((d.character_limit - d.character_count) || 0).toLocaleString();
+    document.getElementById('creditsBar').style.display = 'flex';
+  } catch(e) {}
+}
+
+// ── SHOW VOICE INFO ──
+function showVoiceInfo() {
+  const sel = document.getElementById('voiceSelect');
+  const vid = sel.value;
+  const v = voices.find(x => x.voice_id === vid);
+  const box = document.getElementById('voiceInfo');
+  if (!v) { box.style.display = 'none'; return; }
+
+  const labels = v.labels || {};
+  const parts = [
+    labels.accent ? `🌍 ${labels.accent}` : '',
+    labels.gender ? `👤 ${labels.gender}` : '',
+    labels.age    ? `🕐 ${labels.age}` : '',
+    labels.use_case ? `💼 ${labels.use_case}` : '',
+    labels.description ? `✨ ${labels.description}` : '',
+  ].filter(Boolean);
+
+  box.style.display = 'block';
+  box.innerHTML = parts.length
+    ? parts.join('&nbsp; · &nbsp;')
+    : `Voice ID: ${vid.substring(0,12)}...`;
+}
+
+// ── GENERATE VOICE ──
+async function generateVoice() {
+  const key = getKey();
+  const text = document.getElementById('textInput').value.trim();
+  const voiceId = document.getElementById('voiceSelect').value;
+  const model = document.getElementById('modelSelect').value;
+
+  if (!key)     { showToast('⚠️ Enter API key first', 'err'); return; }
+  if (!text)    { showToast('⚠️ Enter some text first', 'err'); return; }
+  if (!voiceId) { showToast('⚠️ Select a voice first', 'err'); return; }
+  if (text.length > 5000) { showToast('⚠️ Text too long (max 5000 chars)', 'err'); return; }
+
+  // UI: loading state
+  const btn = document.getElementById('genBtn');
+  btn.disabled = true;
+  document.getElementById('genIcon').textContent = '⏳';
+  document.getElementById('genTxt').textContent = 'Generating...';
+  setWave(true);
+
+  // Show progress
+  const pw = document.getElementById('progressWrap');
+  const pf = document.getElementById('progFill');
+  const pt = document.getElementById('progText');
+  pw.style.display = 'block';
+  pf.style.width = '30%';
+  pt.textContent = 'Sending request to ElevenLabs...';
+
+  try {
+    const body = {
+      text: text,
+      model_id: model,
+      language_code: document.getElementById('langSelect').value || undefined,
+      voice_settings: {
+        stability: parseFloat(document.getElementById('stability').value),
+        similarity_boost: parseFloat(document.getElementById('clarity').value),
+        style: parseFloat(document.getElementById('styleEx').value),
+        use_speaker_boost: true
+      }
+    };
+
+    pf.style.width = '60%';
+    pt.textContent = 'Generating audio (this may take a few seconds)...';
+
+    const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+      method: 'POST',
+      headers: {
+        'xi-api-key': key,
+        'Content-Type': 'application/json',
+        'Accept': 'audio/mpeg'
+      },
+      body: JSON.stringify(body)
+    });
+
+    pf.style.width = '90%';
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err?.detail?.message || `API Error ${res.status}`);
+    }
+
+    const blob = await res.blob();
+    if (currentAudioUrl) URL.revokeObjectURL(currentAudioUrl);
+    currentAudioUrl = URL.createObjectURL(blob);
+
+    // Play
+    const player = document.getElementById('audioPlayer');
+    player.src = currentAudioUrl;
+    document.getElementById('audioWrap').style.display = 'block';
+    player.play();
+
+    // Download link
+    const dlBtn = document.getElementById('dlBtn');
+    dlBtn.href = currentAudioUrl;
+    dlBtn.style.display = 'flex';
+
+    // History
+    addHistory(text.substring(0, 60) + (text.length > 60 ? '…' : ''), currentAudioUrl);
+
+    // Refresh credits
+    loadSubInfo(key);
+
+    pf.style.width = '100%';
+    pt.textContent = '✅ Done!';
+    setTimeout(() => { pw.style.display = 'none'; pf.style.width = '0%'; }, 1500);
+
+    showToast('✅ Voice generated!', 'ok');
+
+  } catch(e) {
+    pw.style.display = 'none';
+    showToast('❌ ' + e.message, 'err');
+  } finally {
+    btn.disabled = false;
+    document.getElementById('genIcon').textContent = '▶';
+    document.getElementById('genTxt').textContent = 'Generate Voice';
+    setWave(false);
+  }
+}
+
+// ── HISTORY ──
+function addHistory(label, url) {
+  history.unshift({ label, url });
+  if (history.length > 5) history.pop();
+
+  const card = document.getElementById('historyCard');
+  const list = document.getElementById('historyList');
+  card.style.display = 'block';
+  list.innerHTML = '';
+
+  history.forEach(h => {
+    const div = document.createElement('div');
+    div.className = 'history-item';
+    div.innerHTML = `<span class="history-play">▶</span><span class="history-text">${h.label}</span><a href="${h.url}" download="voice.mp3" style="color:var(--green); font-size:13px; text-decoration:none;">⬇</a>`;
+    div.querySelector('.history-play').onclick = () => {
+      const p = document.getElementById('audioPlayer');
+      p.src = h.url;
+      document.getElementById('audioWrap').style.display = 'block';
+      p.play();
+    };
+    list.appendChild(div);
+  });
+}
+
+// ── UTILS ──
+function setWave(on) {
+  document.querySelectorAll('.wb').forEach(b => b.classList.toggle('active', on));
+}
+
+function setStatus(type, msg) {
+  const el = document.getElementById('apiStatus');
+  el.className = 'api-status ' + type;
+  el.textContent = msg;
+}
+
+function updateCount() {
+  const n = document.getElementById('textInput').value.length;
+  document.getElementById('charCount').textContent = n;
+  document.getElementById('estCost').textContent = n;
+}
+
+function setTxt(t) {
+  document.getElementById('textInput').value = t;
+  updateCount();
+}
+
+function copyText() {
+  const t = document.getElementById('textInput').value;
+  if (!t) { showToast('⚠️ Nothing to copy', 'err'); return; }
+  navigator.clipboard.writeText(t).then(() => showToast('📋 Copied!', 'ok'));
+}
+
+let toastT;
+function showToast(msg, type = 'ok') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  clearTimeout(toastT);
+  toastT = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// Enter key → generate
+document.getElementById('apiKey').addEventListener('keydown', e => {
+  if (e.key === 'Enter') loadVoices();
+});
+</script>
+</body>
+</html>
